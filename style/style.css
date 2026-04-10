@@ -348,4 +348,22 @@ p {
     flex-direction: column;
     gap: 10px;
   }
+
+  .profile img {
+    width: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile img {
+    width: 280px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+  }
 }
