@@ -2,78 +2,174 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Power Energy – Paula Wach</title>
 
+  <!-- FONTY -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style/style.css" />
-  
+
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
+
 <body>
-<canvas id="energyCanvas"></canvas>
+
+<!-- HEADER -->
 <header class="header">
   <div class="logo">
-    <img src="image/logo.jpg" alt="logo">
+    <img src="image/logo.jpg" alt="Power Energy">
     <span>Power Energy</span>
   </div>
+  <nav>
+    <a href="#oferta">Oferta</a>
+    <a href="#o-mnie">O mnie</a>
+    <a href="#kontakt">Kontakt</a>
+  </nav>
 </header>
 
-<!-- 🔥 HERO PREMIUM -->
-<section class="hero">
-  
+<!-- HERO -->
+<section class="hero" data-aos="fade-up">
+  <h1>POWER ENERGY – Kobieta z energią</h1>
+  <h3>Doradztwo energetyczne Paula Wach</h3>
+  <p class="sub">Niezależny doradca energetyczny.</p>
 
-  <div class="hero-content">
-    <h1 class="fade-up">POWER ENERGY</h1>
-    <h2 class="fade-up delay">Kobieta z energią</h2>
+  <p class="highlight">
+    Ja zajmuję się prądem. Ty zajmij się swoim życiem.
+  </p>
 
-    <p class="fade-up delay2">
-      Ja zajmuję się prądem.<br>
-      Ty zajmij się swoim życiem.
-    </p>
-
-    <div class="cta fade-up delay3">
-      <button onclick="scrollToContact()">Skontaktuj się</button>
-      <button onclick="scrollToContact()">Sprawdź oszczędności</button>
-    </div>
+  <div class="cta">
+    <button onclick="scrollToContact()">Sprawdź, ile możesz zaoszczędzić</button>
   </div>
-
-  <div class="hero-image">
-    <img src="image/twarz.jpg" alt="Paula">
-  </div>
-
 </section>
 
-<!-- 🔥 PROBLEM -->
-<section class="section fade">
-  <h2>Wiesz, kto przepłaca?</h2>
+<!-- PROFIL -->
+<section class="section profile" data-aos="fade-up">
+  <img src="image/twarz.jpg" alt="Paula Wach">
+  <h2>Paula Wach – Twój doradca energetyczny</h2>
+</section>
+
+<!-- PROBLEM -->
+<section class="section glass" data-aos="fade-up">
+  <h2>Wiesz, kto najczęściej przepłaca?</h2>
+
+  <p>Osoby, które mówią:<strong>„Ja to ogarnę sam/a.”</strong></p>
 
   <div class="cards">
-    <div class="card">Źle złożony wniosek</div>
-    <div class="card">Przekroczone terminy</div>
-    <div class="card">Zła taryfa</div>
-    <div class="card">Godziny na infolinii</div>
+    <div class="card">źle złożony wniosek</div>
+    <div class="card">przekroczony termin</div>
+    <div class="card">źle dobrana taryfa</div>
+    <div class="card">godziny stracone na infolinii</div>
+    <div class="card">kolejna wizyta w biurze obsługi klienta</div>
   </div>
+
+  <p><strong>A potem frustracja.</strong>
+  Ale najważniejsze, że „za darmo”, prawda?</p>
+
+  <p class="highlight">
+    Jedni tracą energię na walkę z papierami.  
+    Inni delegują i mają to załatwione.
+  </p>
 </section>
 
-<!-- 🔥 ROZWIĄZANIE -->
-<section class="section fade">
-  <h2>Zrobię to za Ciebie</h2>
+<!-- ROZWIĄZANIE -->
+<section class="section glass" data-aos="fade-up">
+  <h2>Zrobię to za Ciebie!</h2>
+
+  <p>
+    Zajmuję się pośrednictwem w załatwianiu wszystkich spraw z operatorami energetycznymi oraz sprzedawcami energii elektrycznej — od złożenia wniosków, uzyskanie warunków przyłączenia, aż po finalizację każdej sprawy, umowy czy reklamacji.
+  </p>
 
   <div class="cards">
     <div class="card">Wnioski</div>
+    <div class="card">Warunki</div>
     <div class="card">Umowy</div>
+    <div class="card">Pisma z energetyki</div>
     <div class="card">Telefony</div>
     <div class="card">Terminy</div>
   </div>
+
+  <p class="highlight">
+    W Twoim imieniu — szybko, skutecznie i bez Twojego stresu.  
+    Bez biegania po urzędach. Bez błędów.
+  </p>
 </section>
 
-<!-- 🔥 KONTAKT -->
-<section id="kontakt" class="section fade">
-  <h2>Kontakt</h2>
-  <button>Umów konsultację</button>
+<!-- DLA KOGO -->
+<section class="section glass" data-aos="fade-up">
+  <h2>To dla Ciebie, jeśli:</h2>
+
+  <div class="cards">
+    <div class="card">Budujesz dom i nie masz pojęcia, od czego zacząć temat prądu</div>
+    <div class="card">Dostałeś pismo z energetyki i brzmi jak w obcym języku</div>
+    <div class="card">Nie masz czasu stać w kolejkach i załatwiać formalności</div>
+  </div>
 </section>
 
+<!-- DORADZTWO -->
+<section class="section glass" data-aos="fade-up" id="oferta">
+  <h2>Czym zajmuje się doradca energetyczny?</h2>
+
+  <p>
+    Niezależny doradca energetyczny to ekspert, który analizuje koszty energii i pomaga znaleźć optymalne rozwiązania, negocjuje warunki i obniża rachunki.
+  </p>
+
+  <div class="cards">
+    <div class="card">Analiza umów i faktur</div>
+    <div class="card">Optymalizacja kosztów</div>
+    <div class="card">Negocjacje</div>
+    <div class="card">Doradztwo strategiczne</div>
+    <div class="card">Wsparcie techniczne</div>
+    <div class="card">OZE</div>
+  </div>
+</section>
+
+<!-- KORZYŚCI -->
+<section class="section glass" data-aos="fade-up">
+  <h2>Co zyskujesz?</h2>
+
+  <div class="cards">
+    <div class="card">Oszczędność kosztów</div>
+    <div class="card">Obiektywność</div>
+    <div class="card">Oszczędność czasu</div>
+    <div class="card">Zrozumienie rynku</div>
+  </div>
+</section>
+
+<!-- O MNIE -->
+<section class="section glass" data-aos="fade-up" id="o-mnie">
+  <h2>Dlaczego możesz mi zaufać?</h2>
+
+  <p>
+    Przez lata zdobywałam kompetencje w jednej z wiodących firm energetycznych w kraju.  
+    Zrozumiałam, przed jakimi wyzwaniami stoją przedsiębiorcy i klienci indywidualni.
+  </p>
+
+  <p class="highlight">
+    Wiem, jak działa rynek – i wiem, jak działać na Twoją korzyść.
+  </p>
+</section>
+
+<!-- CTA FINAL -->
+<section id="kontakt" class="section" data-aos="fade-up">
+  <h2>Skontaktuj się ze mną</h2>
+
+  <p class="highlight">
+    Razem przekształcimy niepotrzebne koszty w inwestycje.
+  </p>
+
+  <div class="cta">
+    <!-- <button onclick="alert('Tutaj podłącz kalendarz online')">Umów konsultację</button> -->
+    <button onclick="window.location.href='mailto:Paula.wach@onet.pl'">Napisz wiadomość</button>
+    <button onclick="window.location.href='tel:+48516478263'">Zadzwoń</button>
+  </div>
+</section>
+
+<!-- SCRIPT -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="script/script.js"></script>
+
 
 </body>
 </html>
