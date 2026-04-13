@@ -150,6 +150,7 @@
   }
 
   async function loadAdmin() {
+    console.log("LOAD ADMIN");
     const container = document.getElementById("adminOpinie");
     if (!container) return;
 
@@ -177,28 +178,55 @@
         <span>${op.name}</span>
         <p>Ocena: ${op.rating || "-"}</p>
         <p>Status: ${op.approved ? "zatwierdzona" : "oczekuje"}</p>
-        ${!op.approved ? `<button onclick="approve('${op._id}')">Zatwierdz</button>` : ""}
-        <button onclick="deleteOp('${op._id}')">Usun</button>
+        ${!op.approved ? `<button data-action="approve" data-id="${op._id}">Zatwierdz</button>` : ""}
+        <button data-action="delete" data-id="${op._id}">Usun</button>
       </div>
     `
       )
       .join("");
+
+    container.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+
+      const id = btn.dataset.id;
+
+      console.log("klik!", btn.dataset.action, id);
+
+      if (btn.dataset.action === "approve") {
+        approve(id);
+      } else {
+        deleteOp(id);
+      }
+    });
   }
 
   async function approve(id) {
-    await fetch(`${API_BASE}/opinie/${id}`, {
-      method: "PATCH",
-      headers: adminHeaders()
-    });
-    loadAdmin();
+    console.log("klik approve", id);
+    try {
+      const res = await fetch(`${API_BASE}/opinie/${id}`, {
+        method: "PATCH",
+        headers: adminHeaders()
+      });
+      if (!res.ok) throw new Error("Status: " + res.status);
+      loadAdmin();
+    } catch (err) {
+      alert("Blad zatwierdzania: " + err.message);
+    }
   }
 
   async function deleteOp(id) {
-    await fetch(`${API_BASE}/opinie/${id}`, {
-      method: "DELETE",
-      headers: adminHeaders()
-    });
-    loadAdmin();
+    console.log("klik delete", id);
+    try {
+      const res = await fetch(`${API_BASE}/opinie/${id}`, {
+        method: "DELETE",
+        headers: adminHeaders()
+      });
+      if (!res.ok) throw new Error("Status: " + res.status);
+      loadAdmin();
+    } catch (err) {
+      alert("Blad usuwania: " + err.message);
+    }
   }
 
   window.approve = approve;
@@ -224,6 +252,7 @@
       }
 
       sessionStorage.setItem("adminPassword", password);
+      console.log("Hasło:", getAdminPassword());
       showAdminPanel(true);
       passwordInput.value = "";
       loadAdmin();

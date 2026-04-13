@@ -148,6 +148,7 @@ body {
   mask-composite: exclude;
   opacity: 0.45;
   transition: 0.4s;
+  pointer-events: none;
 }
 
 .card:hover::before {
