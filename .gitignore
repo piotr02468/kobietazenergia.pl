@@ -1,0 +1,16 @@
+# Zależności node
+node_modules/
+
+# Zmienne środowiskowe - NIGDY nie commituj tego pliku
+.env
+
+# Logi
+*.log
+npm-debug.log*
+
+# System
+.DS_Store
+Thumbs.db
+
+# Dokumentacja
+readme
