@@ -101,12 +101,16 @@
 
     container.innerHTML = data
       .map(
-        (op) => `
+        (op) => {
+          const stars = "⭐".repeat(Number(op.rating) || 5);
+          return `
       <div class="card">
+        <div class="card-stars">${stars}</div>
         <p>"${op.text}"</p>
         <span>- ${op.name}</span>
       </div>
-    `
+    `;
+        }
       )
       .join("");
   }
@@ -150,7 +154,6 @@
   }
 
   async function loadAdmin() {
-    console.log("LOAD ADMIN");
     const container = document.getElementById("adminOpinie");
     if (!container) return;
 
@@ -202,7 +205,6 @@
   }
 
   async function approve(id) {
-    console.log("klik approve", id);
     try {
       const res = await fetch(`${API_BASE}/opinie/${id}`, {
         method: "PATCH",
@@ -216,7 +218,6 @@
   }
 
   async function deleteOp(id) {
-    console.log("klik delete", id);
     try {
       const res = await fetch(`${API_BASE}/opinie/${id}`, {
         method: "DELETE",
@@ -252,7 +253,6 @@
       }
 
       sessionStorage.setItem("adminPassword", password);
-      console.log("Hasło:", getAdminPassword());
       showAdminPanel(true);
       passwordInput.value = "";
       loadAdmin();
