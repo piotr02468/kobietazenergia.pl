@@ -7,6 +7,7 @@ const cors = require("cors");
 const app = express();
 
 app.use(cors());
+app.options("*", cors());
 app.use(express.json());
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
@@ -43,29 +44,38 @@ const Opinion = mongoose.model("Opinion", {
 
 // GET (zatwierdzone - 3)
 app.get("/opinie", async (req, res) => {
-  const opinions = await Opinion.find({ approved: true })
-    .sort({ createdAt: -1 })
-    .limit(3);
-
-  res.json(opinions);
+  try {
+    const opinions = await Opinion.find({ approved: true })
+      .sort({ createdAt: -1 })
+      .limit(3);
+    res.json(opinions);
+  } catch (err) {
+    res.status(500).json({ message: "Błąd serwera" });
+  }
 });
 
 
 // POST (nowa opinia)
 app.post("/opinie", async (req, res) => {
-  const { name, text, rating } = req.body;
-
-  const newOpinion = new Opinion({ name, text, rating });
-  await newOpinion.save();
-
-  res.json({ message: "Dodano (czeka na zatwierdzenie)" });
+  try {
+    const { name, text, rating } = req.body;
+    const newOpinion = new Opinion({ name, text, rating });
+    await newOpinion.save();
+    res.json({ message: "Dodano (czeka na zatwierdzenie)" });
+  } catch (err) {
+    res.status(500).json({ message: "Błąd serwera" });
+  }
 });
 
 
 // ADMIN – wszystkie
 app.get("/admin/opinie", requireAdmin, async (req, res) => {
-  const opinions = await Opinion.find().sort({ createdAt: -1 });
-  res.json(opinions);
+  try {
+    const opinions = await Opinion.find().sort({ createdAt: -1 });
+    res.json(opinions);
+  } catch (err) {
+    res.status(500).json({ message: "Błąd serwera" });
+  }
 });
 
 
@@ -87,15 +97,23 @@ app.post("/admin/login", (req, res) => {
 
 // ZATWIERDŹ
 app.patch("/opinie/:id", requireAdmin, async (req, res) => {
-  await Opinion.findByIdAndUpdate(req.params.id, { approved: true });
-  res.json({ message: "Zatwierdzono" });
+  try {
+    await Opinion.findByIdAndUpdate(req.params.id, { approved: true });
+    res.json({ message: "Zatwierdzono" });
+  } catch (err) {
+    res.status(500).json({ message: "Błąd serwera" });
+  }
 });
 
 
 // USUŃ
 app.delete("/opinie/:id", requireAdmin, async (req, res) => {
-  await Opinion.findByIdAndDelete(req.params.id);
-  res.json({ message: "Usunięto" });
+  try {
+    await Opinion.findByIdAndDelete(req.params.id);
+    res.json({ message: "Usunięto" });
+  } catch (err) {
+    res.status(500).json({ message: "Błąd serwera" });
+  }
 });
 
 
