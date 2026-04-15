@@ -86,36 +86,65 @@
     };
   }
 
-  // OPINIE
-  async function loadOpinions() {
+  function renderOpinionCard(opinion) {
+    const stars = "⭐".repeat(Number(opinion.rating) || 5);
+    return `
+      <div class="card">
+        <div class="card-stars">${stars}</div>
+        <p>"${opinion.text}"</p>
+        <span>- ${opinion.name}</span>
+      </div>
+    `;
+  }
+
+  async function loadAllOpinions() {
     const container = document.getElementById("opinieList");
     if (!container) return;
 
-    const res = await fetch(`${API_BASE}/opinie`);
-    const data = await res.json();
+    try {
+      const res = await fetch(`${API_BASE}/opinie`);
+      const data = await res.json();
 
-    if (!data.length) {
-      container.innerHTML = '<div class="card">Brak zatwierdzonych opinii.</div>';
-      return;
+      if (!Array.isArray(data) || !data.length) {
+        container.innerHTML = '<div class="card">Brak opinii do wyświetlenia.</div>';
+        return;
+      }
+
+      container.innerHTML = data.map(renderOpinionCard).join("");
+    } catch (err) {
+      container.innerHTML = '<div class="card">Nie udało się pobrać opinii.</div>';
     }
-
-    container.innerHTML = data
-      .map(
-        (op) => {
-          const stars = "⭐".repeat(Number(op.rating) || 5);
-          return `
-      <div class="card">
-        <div class="card-stars">${stars}</div>
-        <p>"${op.text}"</p>
-        <span>- ${op.name}</span>
-      </div>
-    `;
-        }
-      )
-      .join("");
   }
 
-  loadOpinions();
+  async function loadFeaturedOpinions() {
+    const section = document.getElementById("homeOpinionsSection");
+    const heading = document.getElementById("homeOpinionsHeading");
+    const container = document.getElementById("featuredOpinieList");
+    if (!container) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/opinie/wyroznione`);
+      const data = await res.json();
+
+      if (!Array.isArray(data) || !data.length) {
+        container.innerHTML = "";
+        if (section) section.classList.add("home-opinions-empty");
+        if (heading) heading.setAttribute("aria-hidden", "true");
+        return;
+      }
+
+      if (section) section.classList.remove("home-opinions-empty");
+      if (heading) heading.removeAttribute("aria-hidden");
+      container.innerHTML = data.map(renderOpinionCard).join("");
+    } catch (err) {
+      container.innerHTML = "";
+      if (section) section.classList.add("home-opinions-empty");
+      if (heading) heading.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  loadAllOpinions();
+  loadFeaturedOpinions();
 
   // OPINIE - dodawanie
   const opinionForm = document.getElementById("form");
@@ -138,11 +167,12 @@
       });
 
       opinionForm.reset();
-      alert("Dzieki! Opinia czeka na zatwierdzenie");
+      loadAllOpinions();
+      alert("Dziękujemy. Opinia została dodana i jest już widoczna na stronie.");
     });
   }
 
-  // ADMIN - logowanie i zarzadzanie opiniami
+  // ADMIN - logowanie i zarządzanie opiniami
   function showAdminPanel(isVisible) {
     const loginBox = document.getElementById("adminLoginBox");
     const panel = document.getElementById("adminPanel");
@@ -169,7 +199,7 @@
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = '<div class="card">Brak opinii do wyswietlenia.</div>';
+      container.innerHTML = '<div class="card">Brak opinii do wyświetlenia.</div>';
       return;
     }
 
@@ -180,40 +210,46 @@
         <p>${op.text}</p>
         <span>${op.name}</span>
         <p>Ocena: ${op.rating || "-"}</p>
-        <p>Status: ${op.approved ? "zatwierdzona" : "oczekuje"}</p>
-        ${!op.approved ? `<button data-action="approve" data-id="${op._id}">Zatwierdz</button>` : ""}
-        <button data-action="delete" data-id="${op._id}">Usun</button>
+        <p>Wyróżniona: ${op.featured ? "tak" : "nie"}</p>
+        <button data-action="toggle-featured" data-featured="${op.featured ? "true" : "false"}" data-id="${op._id}">${op.featured ? "Cofnij wyróżnienie" : "Wyróżnij na głównej"}</button>
+        <button data-action="delete" data-id="${op._id}">Usuń</button>
       </div>
     `
       )
       .join("");
+  }
 
-    container.addEventListener("click", (e) => {
+  const adminContainer = document.getElementById("adminOpinie");
+  if (adminContainer) {
+    adminContainer.addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-action]");
       if (!btn) return;
 
       const id = btn.dataset.id;
 
-      console.log("klik!", btn.dataset.action, id);
+      if (btn.dataset.action === "toggle-featured") {
+        toggleFeatured(id, btn.dataset.featured === "true");
+        return;
+      }
 
-      if (btn.dataset.action === "approve") {
-        approve(id);
-      } else {
+      if (btn.dataset.action === "delete") {
         deleteOp(id);
       }
     });
   }
 
-  async function approve(id) {
+  async function toggleFeatured(id, currentlyFeatured) {
     try {
-      const res = await fetch(`${API_BASE}/opinie/${id}`, {
+      const res = await fetch(`${API_BASE}/opinie/${id}/wyroznione`, {
         method: "PATCH",
-        headers: adminHeaders()
+        headers: adminHeaders(),
+        body: JSON.stringify({ featured: !currentlyFeatured })
       });
       if (!res.ok) throw new Error("Status: " + res.status);
       loadAdmin();
+      loadFeaturedOpinions();
     } catch (err) {
-      alert("Blad zatwierdzania: " + err.message);
+      alert("Błąd zmiany wyróżnienia: " + err.message);
     }
   }
 
@@ -225,12 +261,14 @@
       });
       if (!res.ok) throw new Error("Status: " + res.status);
       loadAdmin();
+      loadAllOpinions();
+      loadFeaturedOpinions();
     } catch (err) {
-      alert("Blad usuwania: " + err.message);
+      alert("Błąd usuwania: " + err.message);
     }
   }
 
-  window.approve = approve;
+  window.toggleFeatured = toggleFeatured;
   window.deleteOp = deleteOp;
 
   const adminForm = document.getElementById("adminLoginForm");
@@ -248,7 +286,7 @@
       });
 
       if (!res.ok) {
-        alert("Niepoprawne haslo");
+        alert("Niepoprawne hasło");
         return;
       }
 
