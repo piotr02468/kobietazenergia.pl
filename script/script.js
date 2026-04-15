@@ -6,10 +6,37 @@
   }
 
   const API_BASE = "https://kobietazenergia-pl.onrender.com";
+  let publicConfig = null;
+  let publicConfigPromise = null;
 
-  function getOpinionsApiKey() {
-    const meta = document.querySelector('meta[name="opinions-api-key"]');
-    return meta ? (meta.getAttribute("content") || "").trim() : "";
+  async function loadPublicConfig() {
+    const res = await fetch(`${API_BASE}/public-config`);
+    if (!res.ok) {
+      throw new Error("Nie udało się pobrać konfiguracji formularza.");
+    }
+
+    const config = await res.json();
+    publicConfig = {
+      opinionsApiKey: String(config.opinionsApiKey || "").trim(),
+      minOpinionLength: Number(config.minOpinionLength) || 0
+    };
+
+    return publicConfig;
+  }
+
+  async function ensurePublicConfig() {
+    if (publicConfig) {
+      return publicConfig;
+    }
+
+    if (!publicConfigPromise) {
+      publicConfigPromise = loadPublicConfig().catch((err) => {
+        publicConfigPromise = null;
+        throw err;
+      });
+    }
+
+    return publicConfigPromise;
   }
 
   // Canvas animation for electricity flow
@@ -160,7 +187,15 @@
       const nameInput = document.getElementById("name");
       const textInput = document.getElementById("text");
       const ratingInput = document.getElementById("rating");
-      const opinionsApiKey = getOpinionsApiKey();
+      let opinionsApiKey = "";
+
+      try {
+        const config = await ensurePublicConfig();
+        opinionsApiKey = config.opinionsApiKey;
+      } catch (err) {
+        alert("Formularz opinii jest chwilowo niedostępny.");
+        return;
+      }
 
       if (!opinionsApiKey) {
         alert("Formularz opinii nie jest jeszcze skonfigurowany.");

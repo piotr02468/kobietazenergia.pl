@@ -9,6 +9,10 @@ const app = express();
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const OPINIONS_API_KEY = process.env.OPINIONS_API_KEY || "";
+const OPINIONS_API_KEYS = (process.env.OPINIONS_API_KEYS || OPINIONS_API_KEY)
+  .split(",")
+  .map((key) => key.trim())
+  .filter(Boolean);
 const MIN_OPINION_LENGTH = Number(process.env.MIN_OPINION_LENGTH) || 20;
 const OPINIONS_POST_WINDOW_MS = Number(process.env.OPINIONS_POST_WINDOW_MS) || 15 * 60 * 1000;
 const OPINIONS_POST_MAX = Number(process.env.OPINIONS_POST_MAX) || 10;
@@ -52,12 +56,12 @@ function requireAdmin(req, res, next) {
 }
 
 function requireOpinieApiKey(req, res, next) {
-  if (!OPINIONS_API_KEY) {
-    return res.status(500).json({ message: "Brak OPINIONS_API_KEY w konfiguracji" });
+  if (!OPINIONS_API_KEYS.length) {
+    return res.status(500).json({ message: "Brak OPINIONS_API_KEY(S) w konfiguracji" });
   }
 
   const providedApiKey = req.header("x-api-key");
-  if (!providedApiKey || providedApiKey !== OPINIONS_API_KEY) {
+  if (!providedApiKey || !OPINIONS_API_KEYS.includes(providedApiKey)) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -71,6 +75,14 @@ const postOpinieLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => req.header("x-api-key") || "missing-api-key",
   message: { message: "Za dużo prób dodania opinii. Spróbuj ponownie później." }
+});
+
+// Publiczna konfiguracja frontendu (klucz do formularza opinii + limity UX)
+app.get("/public-config", (req, res) => {
+  res.json({
+    opinionsApiKey: OPINIONS_API_KEYS[0] || "",
+    minOpinionLength: MIN_OPINION_LENGTH
+  });
 });
 
 // 🔥 POŁĄCZENIE Z ATLAS
