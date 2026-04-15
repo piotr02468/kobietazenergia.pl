@@ -7,8 +7,6 @@ const rateLimit = require("express-rate-limit");
 
 const app = express();
 
-app.set('trust proxy', 1);
-
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const OPINIONS_API_KEY = process.env.OPINIONS_API_KEY || "";
 const MIN_OPINION_LENGTH = Number(process.env.MIN_OPINION_LENGTH) || 20;
@@ -71,6 +69,7 @@ const postOpinieLimiter = rateLimit({
   max: OPINIONS_POST_MAX,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.header("x-api-key") || "missing-api-key",
   message: { message: "Za dużo prób dodania opinii. Spróbuj ponownie później." }
 });
 
