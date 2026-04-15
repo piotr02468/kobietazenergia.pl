@@ -3,15 +3,40 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 
-app.use(cors());
-app.options("*", cors());
-app.use(express.json());
-
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
+const OPINIONS_API_KEY = process.env.OPINIONS_API_KEY || "";
+const MIN_OPINION_LENGTH = Number(process.env.MIN_OPINION_LENGTH) || 20;
+const OPINIONS_POST_WINDOW_MS = Number(process.env.OPINIONS_POST_WINDOW_MS) || 15 * 60 * 1000;
+const OPINIONS_POST_MAX = Number(process.env.OPINIONS_POST_MAX) || 10;
 const PORT = Number(process.env.PORT) || 3000;
+
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Allow server-to-server or same-origin requests without Origin header.
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (!allowedOrigins.length || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origin not allowed by CORS"));
+  }
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+app.use(express.json());
 
 function requireAdmin(req, res, next) {
   if (!ADMIN_PASSWORD) {
@@ -25,6 +50,27 @@ function requireAdmin(req, res, next) {
 
   next();
 }
+
+function requireOpinieApiKey(req, res, next) {
+  if (!OPINIONS_API_KEY) {
+    return res.status(500).json({ message: "Brak OPINIONS_API_KEY w konfiguracji" });
+  }
+
+  const providedApiKey = req.header("x-api-key");
+  if (!providedApiKey || providedApiKey !== OPINIONS_API_KEY) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  next();
+}
+
+const postOpinieLimiter = rateLimit({
+  windowMs: OPINIONS_POST_WINDOW_MS,
+  max: OPINIONS_POST_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Za dużo prób dodania opinii. Spróbuj ponownie później." }
+});
 
 // 🔥 POŁĄCZENIE Z ATLAS
 mongoose.connect(process.env.MONGO_URI)
@@ -69,18 +115,28 @@ app.get("/opinie/wyroznione", async (req, res) => {
 
 
 // POST (nowa opinia)
-app.post("/opinie", async (req, res) => {
+app.post("/opinie", postOpinieLimiter, requireOpinieApiKey, async (req, res) => {
   try {
     const { name, text, rating } = req.body || {};
+    const normalizedName = String(name || "").trim();
+    const normalizedText = String(text || "")
+      .replace(/\s+/g, " ")
+      .trim();
     const parsedRating = Number(rating);
 
-    if (!name || !text || Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+    if (!normalizedName || !normalizedText || Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
       return res.status(400).json({ message: "Nieprawidłowe dane opinii" });
     }
 
+    if (normalizedText.length < MIN_OPINION_LENGTH) {
+      return res.status(400).json({
+        message: `Opinia jest zbyt krótka. Minimum to ${MIN_OPINION_LENGTH} znaków.`
+      });
+    }
+
     const newOpinion = new Opinion({
-      name,
-      text,
+      name: normalizedName,
+      text: normalizedText,
       rating: parsedRating,
       featured: false
     });
