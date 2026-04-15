@@ -5,7 +5,7 @@
     }
   }
 
-  const API_BASE = "http://localhost:3000";
+  const API_BASE = "https://kobietazenergia-pl.onrender.com";
 
   // Canvas animation for electricity flow
   const canvas = document.getElementById("bg-canvas");
