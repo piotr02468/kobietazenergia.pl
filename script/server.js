@@ -7,6 +7,8 @@ const rateLimit = require("express-rate-limit");
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const OPINIONS_API_KEY = process.env.OPINIONS_API_KEY || "";
 const MIN_OPINION_LENGTH = Number(process.env.MIN_OPINION_LENGTH) || 20;
