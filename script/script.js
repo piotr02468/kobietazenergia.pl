@@ -7,6 +7,11 @@
 
   const API_BASE = "https://kobietazenergia-pl.onrender.com";
 
+  function getOpinionsApiKey() {
+    const meta = document.querySelector('meta[name="opinions-api-key"]');
+    return meta ? (meta.getAttribute("content") || "").trim() : "";
+  }
+
   // Canvas animation for electricity flow
   const canvas = document.getElementById("bg-canvas");
   if (canvas) {
@@ -155,16 +160,39 @@
       const nameInput = document.getElementById("name");
       const textInput = document.getElementById("text");
       const ratingInput = document.getElementById("rating");
+      const opinionsApiKey = getOpinionsApiKey();
 
-      await fetch(`${API_BASE}/opinie`, {
+      if (!opinionsApiKey) {
+        alert("Formularz opinii nie jest jeszcze skonfigurowany.");
+        return;
+      }
+
+      const res = await fetch(`${API_BASE}/opinie`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": opinionsApiKey
+        },
         body: JSON.stringify({
           name: nameInput.value,
           text: textInput.value,
           rating: ratingInput.value
         })
       });
+
+      if (!res.ok) {
+        let message = "Nie udało się dodać opinii.";
+        try {
+          const errorData = await res.json();
+          if (errorData && errorData.message) {
+            message = errorData.message;
+          }
+        } catch (err) {
+          // Ignore JSON parse errors and keep generic message.
+        }
+        alert(message);
+        return;
+      }
 
       opinionForm.reset();
       loadAllOpinions();
